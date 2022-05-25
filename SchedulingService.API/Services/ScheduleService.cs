@@ -41,9 +41,11 @@ namespace SchedulingService.API.Services
         public async Task CreateAsync(Company newCompany)
         {
             ScheduleConstructor _scheduleConstructor = new ScheduleConstructor();
-            _scheduleConstructor.CalculateSchedule(newCompany);
 
-            await _schedulesCollection.InsertOneAsync(_scheduleConstructor.CalculateSchedule(newCompany));
+            if (_scheduleConstructor.CalculateSchedule(newCompany) != null)
+            {
+                await _schedulesCollection.InsertOneAsync(_scheduleConstructor.CalculateSchedule(newCompany));
+            }
 
             await _companiesCollection.InsertOneAsync(newCompany);
         }

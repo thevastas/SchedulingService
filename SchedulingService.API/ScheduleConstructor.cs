@@ -7,7 +7,7 @@ namespace SchedulingService.API
         static public readonly int[] nodays = { 1, 5, 10, 20 };
         static public readonly int[] sedays = { 1, 7, 14, 28 };
         static public readonly int[] fidays = { 1, 5, 10, 15, 20 };
-        public Schedule CalculateSchedule(Company newCompany)
+        public Schedule? CalculateSchedule(Company newCompany)
         {
             var schedule = new Schedule();
             
@@ -34,34 +34,22 @@ namespace SchedulingService.API
                     break;
                 case "SE":
                     if (newCompany.Type != "large") days = sedays;
-                    else supported = false;
+                    else return null;
                     break;
                 case "FI":
                     if (newCompany.Type == "large") days = fidays;
-                    else supported = false;
+                    else return null;
                     break;
                 default:
-                    supported = false;
                     return null;
             }
-            if (supported)
-            {
-                for (int i = 0; i < days.Length; i++) notifications.Add(today.AddDays(days[i]));
-                schedule.Notifications = notifications;
 
-            }
+            for (int i = 0; i < days.Length; i++) notifications.Add(today.AddDays(days[i]));
+            schedule.Notifications = notifications;
 
             return schedule;
         }
-
-
-
-
-
-
-
-
-}
+    }
 
 
 public static class CountryConstants
