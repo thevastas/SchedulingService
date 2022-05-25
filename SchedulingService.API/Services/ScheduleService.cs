@@ -1,7 +1,7 @@
 ﻿using SchedulingService.API.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using MongoDB.Bson;
+//using MongoDB.Bson;
 
 
 
@@ -12,7 +12,7 @@ namespace SchedulingService.API.Services
     {
         private readonly IMongoCollection<Schedule> _schedulesCollection;
         private readonly IMongoCollection<Company> _companiesCollection;
-
+        //private readonly contryschedule = new CountrySchedule();
         public ScheduleService(IOptions<ScheduleDatabaseSettings> scheduleDatabaseSettings)
         {
             var mongoClient = new MongoClient(
@@ -40,64 +40,12 @@ namespace SchedulingService.API.Services
 
         public async Task CreateAsync(Company newCompany)
         {
+            ScheduleConstructor _scheduleConstructor = new ScheduleConstructor();
+            _scheduleConstructor.CalculateSchedule(newCompany);
 
-            var schedule = new Schedule();
-            DateTime today = DateTime.Today.AddHours(16);
-            // Why is this needed? (-3 hours is retrieved from what it should be)
+            await _schedulesCollection.InsertOneAsync(_scheduleConstructor.CalculateSchedule(newCompany));
 
-            var notifications = new List<DateTime>();
-
-            bool supported = true;
-            Guid id = Guid.NewGuid();
-            schedule.CompanyId = id.ToString();
-            newCompany.Id = id.ToString();
-            switch (newCompany.Market)
-            {
-                case "DK":
-                    notifications.Add(today.AddDays(1));
-                    notifications.Add(today.AddDays(5));
-                    notifications.Add(today.AddDays(10));
-                    notifications.Add(today.AddDays(15));
-                    notifications.Add(today.AddDays(20));
-                    break;
-                case "NO":
-                    notifications.Add(today.AddDays(1));
-                    notifications.Add(today.AddDays(5));
-                    notifications.Add(today.AddDays(10));
-                    notifications.Add(today.AddDays(20));
-                    break;
-                case "SE":
-                    if (newCompany.Type != "large")
-                    {
-                        notifications.Add(today.AddDays(1));
-                        notifications.Add(today.AddDays(7));
-                        notifications.Add(today.AddDays(14));
-                        notifications.Add(today.AddDays(28));
-                    }
-                    else supported = false;
-                    break;
-                case "FI":
-                    if (newCompany.Type == "large")
-                    {
-                        notifications.Add(today.AddDays(1));
-                        notifications.Add(today.AddDays(5));
-                        notifications.Add(today.AddDays(10));
-                        notifications.Add(today.AddDays(15));
-                        notifications.Add(today.AddDays(20));
-                    }
-                    else supported = false;
-                    break;
-                default:
-                    supported = false;
-                    break;
-            }
-
-
-
-            schedule.Notifications = notifications;
             await _companiesCollection.InsertOneAsync(newCompany);
-
-            if (supported)  await _schedulesCollection.InsertOneAsync(schedule);
         }
     
 
