@@ -11,7 +11,7 @@ namespace SchedulingService.API.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
         [BsonElement("CompanyId")]
-        public Guid CompanyId { get; set; }
+        public string CompanyId { get; set; }
         [BsonElement("Notifications")]
         public List<DateTime> Notifications { get; set; }
     }

@@ -11,7 +11,7 @@ namespace SchedulingService.API.Services
     public class ScheduleService : IScheduleService
     {
         private readonly IMongoCollection<Schedule> _schedulesCollection;
-
+        private readonly IMongoCollection<Company> _companiesCollection;
 
         public ScheduleService(IOptions<ScheduleDatabaseSettings> scheduleDatabaseSettings)
         {
@@ -23,6 +23,9 @@ namespace SchedulingService.API.Services
 
             _schedulesCollection = mongoDatabase.GetCollection<Schedule>(
                 scheduleDatabaseSettings.Value.SchedulesCollectionName);
+            _companiesCollection = mongoDatabase.GetCollection<Company>(
+                scheduleDatabaseSettings.Value.CompaniesCollectionName);
+
         }
 
         public async Task<List<Schedule>> GetAsync()
@@ -30,28 +33,71 @@ namespace SchedulingService.API.Services
             return await _schedulesCollection.Find(_ => true).ToListAsync();
         }
     
-        public async Task<Schedule> GetAsync(Guid companyid)
+        public async Task<Schedule> GetAsync(string companyid)
         {
-            // Y U NO WORK DICKHEAD
             return await _schedulesCollection.Find(x => x.CompanyId.Equals(companyid)).FirstOrDefaultAsync();
-            // 265d5fb2-c70b-4eab-b513-1c2e158aaac3
-
         }
 
         public async Task CreateAsync(Company newCompany)
         {
 
             var schedule = new Schedule();
-            var notifications = new List<DateTime>()
-            {
-                new DateTime(2015, 12, 25),
-                new DateTime(2016, 12, 25),
-                new DateTime(2017, 12, 25)
-            };
-            schedule.CompanyId = newCompany.Id;
-            schedule.Notifications = notifications;
+            DateTime today = DateTime.Today.AddHours(16);
+            // Why is this needed? (-3 hours is retrieved from what it should be)
 
-            await _schedulesCollection.InsertOneAsync(schedule);
+            var notifications = new List<DateTime>();
+
+            bool supported = true;
+            Guid id = Guid.NewGuid();
+            schedule.CompanyId = id.ToString();
+            newCompany.Id = id.ToString();
+            switch (newCompany.Market)
+            {
+                case "DK":
+                    notifications.Add(today.AddDays(1));
+                    notifications.Add(today.AddDays(5));
+                    notifications.Add(today.AddDays(10));
+                    notifications.Add(today.AddDays(15));
+                    notifications.Add(today.AddDays(20));
+                    break;
+                case "NO":
+                    notifications.Add(today.AddDays(1));
+                    notifications.Add(today.AddDays(5));
+                    notifications.Add(today.AddDays(10));
+                    notifications.Add(today.AddDays(20));
+                    break;
+                case "SE":
+                    if (newCompany.Type != "large")
+                    {
+                        notifications.Add(today.AddDays(1));
+                        notifications.Add(today.AddDays(7));
+                        notifications.Add(today.AddDays(14));
+                        notifications.Add(today.AddDays(28));
+                    }
+                    else supported = false;
+                    break;
+                case "FI":
+                    if (newCompany.Type == "large")
+                    {
+                        notifications.Add(today.AddDays(1));
+                        notifications.Add(today.AddDays(5));
+                        notifications.Add(today.AddDays(10));
+                        notifications.Add(today.AddDays(15));
+                        notifications.Add(today.AddDays(20));
+                    }
+                    else supported = false;
+                    break;
+                default:
+                    supported = false;
+                    break;
+            }
+
+
+
+            schedule.Notifications = notifications;
+            await _companiesCollection.InsertOneAsync(newCompany);
+
+            if (supported)  await _schedulesCollection.InsertOneAsync(schedule);
         }
     
 

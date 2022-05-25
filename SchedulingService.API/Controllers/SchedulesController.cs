@@ -21,7 +21,7 @@ namespace SchedulingService.API.Controllers
         }
 
         [HttpGet("{CompanyId}")]
-        public async Task<ActionResult<Schedule>> Get(Guid CompanyId)
+        public async Task<ActionResult<Schedule>> Get(string CompanyId)
         {
             var schedule = await _schedulesService.GetAsync(CompanyId);
 
