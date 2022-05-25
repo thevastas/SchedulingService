@@ -7,5 +7,7 @@ namespace SchedulingService.API.Services
     {
 
         public Task<Schedule> GetAsync(Guid companyid);
+        public Task CreateAsync(Company newCompany);
+        public Task<List<Schedule>> GetAsync();
     }
 }

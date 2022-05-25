@@ -9,15 +9,21 @@ namespace SchedulingService.API.Controllers
     [Route("api/[controller]")]
     public class SchedulesController: ControllerBase
     {
-        private readonly IScheduleService _scheduleService;
+        private readonly IScheduleService _schedulesService;
 
-        public SchedulesController(IScheduleService scheduleService) =>
-            _scheduleService = scheduleService;
+        public SchedulesController(IScheduleService schedulesService) =>
+            _schedulesService = schedulesService;
 
         [HttpGet]
-        public async Task<ActionResult<Schedule>> Get()
+        public async Task<List<Schedule>> Get()
         {
-            var schedule = await _scheduleService.GetAsync(Guid.NewGuid());
+            return await _schedulesService.GetAsync();
+        }
+
+        [HttpGet("{CompanyId}")]
+        public async Task<ActionResult<Schedule>> Get(Guid CompanyId)
+        {
+            var schedule = await _schedulesService.GetAsync(CompanyId);
 
             if (schedule is null)
             {
@@ -27,6 +33,13 @@ namespace SchedulingService.API.Controllers
             return schedule;
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Post(Company newCompany)
+        {
+            await _schedulesService.CreateAsync(newCompany);
+
+            return CreatedAtAction(nameof(Get), new { id = newCompany.Id }, newCompany);
+        }
 
     }
 }
