@@ -1,10 +1,6 @@
 ﻿using SchedulingService.API.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-//using MongoDB.Bson;
-
-
-
 
 namespace SchedulingService.API.Services
 {
@@ -12,7 +8,6 @@ namespace SchedulingService.API.Services
     {
         private readonly IMongoCollection<Schedule> _schedulesCollection;
         private readonly IMongoCollection<Company> _companiesCollection;
-        //private readonly contryschedule = new CountrySchedule();
         public ScheduleService(IOptions<ScheduleDatabaseSettings> scheduleDatabaseSettings)
         {
             var mongoClient = new MongoClient(
@@ -49,10 +44,5 @@ namespace SchedulingService.API.Services
 
             await _companiesCollection.InsertOneAsync(newCompany);
         }
-    
-
-
     }
-
-
 }

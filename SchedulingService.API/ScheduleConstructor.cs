@@ -11,13 +11,11 @@ namespace SchedulingService.API
         {
             var schedule = new Schedule();
             
-
             DateTime today = DateTime.UtcNow.Date;
 
             int[] days = Array.Empty<int>();
 
             var notifications = new List<DateTime>();
-            bool supported = true;
 
             Guid id = Guid.NewGuid();
             schedule.CompanyId = id.ToString();
